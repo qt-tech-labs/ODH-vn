@@ -20,32 +20,16 @@ class envn_Cambridge {
         return await this.findCambridge(word);
     }
 
-    removeTags(elem, name) {
-        let tags = elem.querySelectorAll(name);
-        tags.forEach(x => {
-            x.outerHTML = '';
-        });
-    }
-
-    removelinks(elem) {
-        let tags = elem.querySelectorAll('a');
-        tags.forEach(x => {
-            x.outerHTML = x.innerText;
-        });
-
-        tags = elem.querySelectorAll('h2');
-        tags.forEach(x => {
-            x.outerHTML = `<div class='head2'>${x.innerHTML}</div>`;
-        });
-
-        tags = elem.querySelectorAll('h3');
-        tags.forEach(x => {
-            x.outerHTML = `<div class='head3'>${x.innerHTML}</div>`;
-        });
-    }
-
     async findCambridge(word) {
-        if (!word) return null;
+        let notes = [];
+        if (!word) return notes; // return empty notes
+
+        function T(node) {
+            if (!node)
+                return '';
+            else
+                return node.innerText.trim();
+        }
 
         let base = 'https://dictionary.cambridge.org/search/english-vietnamese/direct/?q=';
         let url = base + encodeURIComponent(word);
@@ -55,31 +39,91 @@ class envn_Cambridge {
             let parser = new DOMParser();
             doc = parser.parseFromString(data, 'text/html');
         } catch (err) {
-            return null;
+            return [];
         }
 
-        let contents = doc.querySelectorAll('.pr .dictionary') || [];
-        if (contents.length == 0) return null;
+        let entries = doc.querySelectorAll('.pr .entry-body__el') || [];
+        for (const entry of entries) {
+            let definitions = [];
+            let audios = [];
 
-        let definition = '';
-        for (const content of contents) {
-            this.removeTags(content, '.extraexamps');
-            this.removeTags(content, '.definition-src');
-            this.removeTags(content, 'h2');
-            this.removeTags(content, '.d_br');
-            this.removeTags(content, '.freq.dfreq');
-            this.removelinks(content);
-            definition += content.innerHTML;
+            let expression = T(entry.querySelector('.headword'));
+            let reading = '';
+            let readings = entry.querySelectorAll('.pron .ipa');
+            if (readings) {
+                let reading_uk = T(readings[0]);
+                let reading_us = T(readings[1]);
+                reading = (reading_uk || reading_us) ? `UK[${reading_uk}] US[${reading_us}] ` : '';
+            }
+            let pos = T(entry.querySelector('.posgram'));
+            pos = pos ? `<span class='pos'>${pos}</span>` : '';
+            audios[0] = entry.querySelector(".uk.dpron-i source");
+            audios[0] = audios[0] ? 'https://dictionary.cambridge.org' + audios[0].getAttribute('src') : '';
+            //audios[0] = audios[0].replace('https', 'http');
+            audios[1] = entry.querySelector(".us.dpron-i source");
+            audios[1] = audios[1] ? 'https://dictionary.cambridge.org' + audios[1].getAttribute('src') : '';
+            //audios[1] = audios[1].replace('https', 'http');
+
+            let sensbodys = entry.querySelectorAll('.sense-body') || [];
+            for (const sensbody of sensbodys) {
+                let sensblocks = sensbody.childNodes || [];
+                for (const sensblock of sensblocks) {
+                    let phrasehead = '';
+                    let defblocks = [];
+                    if (sensblock.classList && sensblock.classList.contains('phrase-block')) {
+                        phrasehead = T(sensblock.querySelector('.phrase-title'));
+                        phrasehead = phrasehead ? `<div class="phrasehead">${phrasehead}</div>` : '';
+                        defblocks = sensblock.querySelectorAll('.def-block') || [];
+                    }
+                    if (sensblock.classList && sensblock.classList.contains('def-block')) {
+                        defblocks = [sensblock];
+                    }
+                    if (defblocks.length <= 0) continue;
+
+                    // make definition segement
+                    for (const defblock of defblocks) {
+                        let eng_tran = T(defblock.querySelector('.ddef_h .def'));
+                        let chn_tran = T(defblock.querySelector('.def-body .trans'));
+                        if (!eng_tran) continue;
+                        let definition = '';
+                        eng_tran = `<span class='eng_tran'>${eng_tran.replace(RegExp(expression, 'gi'), `<b>${expression}</b>`)}</span>`;
+                        chn_tran = `<span class='chn_tran'>${chn_tran}</span>`;
+                        let tran = `<span class='tran'>${eng_tran}${chn_tran}</span>`;
+                        definition += phrasehead ? `${phrasehead}${tran}` : `${pos}${tran}`;
+
+                        // make exmaple segement
+                        let examps = defblock.querySelectorAll('.def-body .examp') || [];
+                        if (examps.length > 0 && this.maxexample > 0) {
+                            definition += '<ul class="sents">';
+                            for (const [index, examp] of examps.entries()) {
+                                if (index > this.maxexample - 1) break; // to control only 2 example sentence.
+                                let eng_examp = T(examp.querySelector('.eg'));
+                                let chn_examp = T(examp.querySelector('.trans'));
+                                definition += `<li class='sent'><span class='eng_sent'>${eng_examp.replace(RegExp(expression, 'gi'), `<b>${expression}</b>`)}</span><span class='chn_sent'>${chn_examp}</span></li>`;
+                            }
+                            definition += '</ul>';
+                        }
+                        definition && definitions.push(definition);
+                    }
+                }
+            }
+            let css = this.renderCSS();
+            notes.push({
+                css,
+                expression,
+                reading,
+                definitions,
+                audios
+            });
         }
-        let css = this.renderCSS();
-        return definition ? css + definition : null;
+        return notes;
     }
 
     renderCSS() {
         let css = `
             <style>
+                div.phrasehead{margin: 2px 0;font-weight: bold;}
                 span.star {color: #FFBB00;}
-                span.cet  {margin: 0 3px;padding: 0 3px;font-weight: normal;font-size: 0.8em;color: white;background-color: #5cb85c;border-radius: 3px;}
                 span.pos  {text-transform:lowercase; font-size:0.9em; margin-right:5px; padding:2px 4px; color:white; background-color:#0d47a1; border-radius:3px;}
                 span.tran {margin:0; padding:0;}
                 span.eng_tran {margin-right:3px; padding:0;}
