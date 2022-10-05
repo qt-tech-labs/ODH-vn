@@ -78,27 +78,17 @@ class envn_Cambridge {
     renderCSS() {
         let css = `
             <style>
-            .entry-body__el{margin-bottom:10px;}
-            .head2{font-size: 1.2em;font-weight:bold;}
-            .pos-header{border-bottom: 1px solid;}
-            .head3 {display:none;}
-            .posgram {font-size: 0.8em;background-color: #959595;color: white;padding: 2px 5px;border-radius: 3px;}
-            .epp-xref::after {content: ")";}
-            .epp-xref::before {content: "(";}
-            .def-block, .phrase-block {
-                /*border: 1px solid;*/
-                /*border-color: #e5e6e9 #dfe0e4 #d0d1d5;*/
-                border-radius: 3px;
-                padding: 5px;
-                margin: 5px 0;
-                background-color: #f6f6f6;
-            }
-            .phrase-block .def-block{border: initial;padding: initial;}
-            p.def-head {margin: auto;}
-            .phrase-head {vertical-align: middle;color: #1683ea;font-weight: bold;}
-            .trans {color: #5079bb;}
+                span.star {color: #FFBB00;}
+                span.cet  {margin: 0 3px;padding: 0 3px;font-weight: normal;font-size: 0.8em;color: white;background-color: #5cb85c;border-radius: 3px;}
+                span.pos  {text-transform:lowercase; font-size:0.9em; margin-right:5px; padding:2px 4px; color:white; background-color:#0d47a1; border-radius:3px;}
+                span.tran {margin:0; padding:0;}
+                span.eng_tran {margin-right:3px; padding:0;}
+                span.chn_tran {color:#0d47a1;}
+                ul.sents {font-size:0.8em; list-style:square inside; margin:3px 0;padding:5px;background:rgba(13,71,161,0.1); border-radius:5px;}
+                li.sent  {margin:0; padding:0;}
+                span.eng_sent {margin-right:5px;}
+                span.chn_sent {color:#0d47a1;}
             </style>`;
-
         return css;
     }
 }
