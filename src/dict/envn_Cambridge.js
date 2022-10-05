@@ -1,5 +1,5 @@
 /* global api */
-class en_Cambridge {
+class envn_Cambridge {
     constructor(options) {
         this.options = options;
         this.maxexample = 2;
@@ -7,7 +7,7 @@ class en_Cambridge {
     }
 
     async displayName() {
-        return "Cambridge EN Dictionary";
+        return "EN-VN Dictionary";
     }
 
     setOptions(options) {
@@ -85,6 +85,50 @@ class en_Cambridge {
 
         return definition;
     }
+
+    async findVNCambridge(word) {
+        let notes = [];
+        if (!word) return [];
+
+        let base = "https://dictionary.cambridge.org/search/english-vietnamese/direct/?q=";
+        let url = base + encodeURIComponent(word);
+        let doc = "";
+        try {
+            let data = await api.fetch(url);
+            let parser = new DOMParser();
+            doc = parser.parseFromString(data, "text/html");
+        } catch (err) {
+            return [];
+        }
+
+        const entries = doc.querySelectorAll(".english-vietnamese .kdic");
+        if (this.isEmptyArray(entries)) return [];
+
+        for (const entry of entries) {
+            const definitions = [];
+
+            const pos = this.getPosgram(entry.querySelector(".dpos"))
+
+            const sensblocks = entry.querySelectorAll(".sense-block");
+            if (this.isEmptyArray(sensblocks)) continue;
+
+            for (const sensblock of sensblocks) {
+                let vnTrans = this.getTrimInnerText(
+                    sensblock.querySelector(".trans")
+                );
+                if (!vnTrans) continue;
+                const tran = `<span class='tran'>${vnTrans}</span>`;
+                // let definition = `${pos} : ${tran}`;
+
+                if (tran) definitions.push(tran);
+            }
+            notes.push({
+                definitions
+            });
+        }
+        return notes;
+    }
+
 
     async findCambridge(word) {
         let notes = [];
@@ -180,6 +224,20 @@ class en_Cambridge {
                 audios,
             });
         }
+
+        // add VIetname
+
+        let vntrans = await this.findVNCambridge(word)
+
+        if (vntrans && vntrans.length > 0) {
+            let first = vntrans[0]
+            if (first && first.definitions && first.definitions.length > 0) {
+                let str = first.definitions.join(",")
+                str && notes && notes.length > 0 && notes[0].definitions.push(str)
+            }
+        }
+        // Add Vientma
+
         return notes;
     }
 
