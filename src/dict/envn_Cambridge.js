@@ -233,7 +233,7 @@ class envn_Cambridge {
             let first = vntrans[0]
             if (first && first.definitions && first.definitions.length > 0) {
                 let str = first.definitions.join(",")
-                str && notes && notes.length > 0 && notes[0].definitions.push(str)
+                str && notes && notes.length > 0 && notes[0].definitions.unshift(str)
             }
         }
         // Add Vientma
