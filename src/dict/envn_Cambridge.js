@@ -117,10 +117,12 @@ class envn_Cambridge {
                     sensblock.querySelector(".trans")
                 );
                 if (!vnTrans) continue;
-                const tran = `<span class='tran'>${vnTrans}</span>`;
+                // const tran = `<span class='tran'>${vnTrans}</span>`;
+                let fullTrans = `<span class="pos">${pos}</span>`
+                fullTrans += `=> <span class="tran"><span class="eng_tran">${vnTrans}</span></span>`;
                 // let definition = `${pos} : ${tran}`;
 
-                if (tran) definitions.push(tran);
+                if (fullTrans) definitions.push(fullTrans);
             }
             notes.push({
                 definitions
@@ -232,8 +234,8 @@ class envn_Cambridge {
         if (vntrans && vntrans.length > 0) {
             let first = vntrans[0]
             if (first && first.definitions && first.definitions.length > 0) {
-                let str = first.definitions.join(",")
-                str && notes && notes.length > 0 && notes[0].definitions.unshift(str)
+                let str = first.definitions.join("")
+                str && notes && notes.length > 0 && notes[0].definitions[0] && (notes[0].definitions[0] = str + notes[0].definitions[0])
             }
         }
         // Add Vientma
