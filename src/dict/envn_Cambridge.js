@@ -36,11 +36,11 @@ class envn_Cambridge {
 
         let pronunciation = "";
 
-        const ukPronunciationDOM = nodes.querySelector(
-            ".uk.dpron-i > .pron.dpron > .ipa"
-        );
-        const ukPronunciation = this.getTrimInnerText(ukPronunciationDOM);
-        if (ukPronunciation) pronunciation += `UK[${ukPronunciation}]; `;
+//         const ukPronunciationDOM = nodes.querySelector(
+//             ".uk.dpron-i > .pron.dpron > .ipa"
+//         );
+//         const ukPronunciation = this.getTrimInnerText(ukPronunciationDOM);
+//         if (ukPronunciation) pronunciation += `UK[${ukPronunciation}]; `;
 
         const usPronunciationDOM = nodes.querySelector(
             ".us.dpron-i > .pron.dpron > .ipa"
