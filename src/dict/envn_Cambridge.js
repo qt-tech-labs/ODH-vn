@@ -36,11 +36,11 @@ class envn_Cambridge {
 
         let pronunciation = "";
 
-//         const ukPronunciationDOM = nodes.querySelector(
-//             ".uk.dpron-i > .pron.dpron > .ipa"
-//         );
-//         const ukPronunciation = this.getTrimInnerText(ukPronunciationDOM);
-//         if (ukPronunciation) pronunciation += `UK[${ukPronunciation}]; `;
+        //         const ukPronunciationDOM = nodes.querySelector(
+        //             ".uk.dpron-i > .pron.dpron > .ipa"
+        //         );
+        //         const ukPronunciation = this.getTrimInnerText(ukPronunciationDOM);
+        //         if (ukPronunciation) pronunciation += `UK[${ukPronunciation}]; `;
 
         const usPronunciationDOM = nodes.querySelector(
             ".us.dpron-i > .pron.dpron > .ipa"
@@ -119,7 +119,7 @@ class envn_Cambridge {
                 if (!vnTrans) continue;
                 // const tran = `<span class='tran'>${vnTrans}</span>`;
                 let fullTrans = `<span class="pos">${pos}</span>`
-                fullTrans += `=> <span class="tran"><span class="eng_tran">${vnTrans}</span></span>`;
+                fullTrans += `<span class="tran"><span class="eng_tran">${vnTrans}</span></span><br/>`;
                 // let definition = `${pos} : ${tran}`;
 
                 if (fullTrans) definitions.push(fullTrans);
