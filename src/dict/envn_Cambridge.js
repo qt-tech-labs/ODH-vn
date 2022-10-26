@@ -277,7 +277,7 @@ class envn_Cambridge {
 
         // add VIetname
 
-        let vntrans = await this.findVNSoha(word)
+        let vntrans = await this.findVNCambridge(word)
 
         if (vntrans && vntrans.length > 0) {
             let first = vntrans[0]
