@@ -86,6 +86,54 @@ class envn_Cambridge {
         return definition;
     }
 
+
+    async findVNSoha(word) {
+        let notes = [];
+        if (!word) return [];
+
+        let base = "http://tratu.soha.vn/dict/en_vn/";
+        let url = base + encodeURIComponent(word);
+        let doc = "";
+        try {
+            let data = await api.fetch(url);
+            let parser = new DOMParser();
+            doc = parser.parseFromString(data, "text/html");
+        } catch (err) {
+            return [];
+        }
+
+        const entries = doc.querySelectorAll(".section-h3");
+        if (this.isEmptyArray(entries)) return [];
+
+        for (const entry of entries) {
+            const definitions = [];
+
+            const pos = this.getPosgram(entry.querySelector(".mw-headline"))
+
+            const sensblocks = entry.querySelectorAll('.section-h5');
+            if (this.isEmptyArray(sensblocks)) continue;
+
+            for (const sensblock of sensblocks) {
+                let vnTrans = this.getTrimInnerText(
+                    sensblock.childNodes[0].innerText
+                );
+                if (!vnTrans) continue;
+                // const tran = `<span class='tran'>${vnTrans}</span>`;
+                let fullTrans = `<span class="pos">${pos}</span>`
+                fullTrans += `<span class="tran"><span class="eng_tran">${vnTrans}</span></span><br/>`;
+                // let definition = `${pos} : ${tran}`;
+
+                if (fullTrans) definitions.push(fullTrans);
+            }
+            notes.push({
+                definitions
+            });
+        }
+        return notes;
+    }
+
+
+
     async findVNCambridge(word) {
         let notes = [];
         if (!word) return [];
@@ -229,7 +277,7 @@ class envn_Cambridge {
 
         // add VIetname
 
-        let vntrans = await this.findVNCambridge(word)
+        let vntrans = await this.findVNSoha(word)
 
         if (vntrans && vntrans.length > 0) {
             let first = vntrans[0]
